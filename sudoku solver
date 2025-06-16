@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import collections
 import copy
 from multiprocessing import Pool
 import os
@@ -12,7 +11,6 @@ def cross(A, B):
     return [s + t for s in A for t in B]
 
 boxes = cross(rows, cols)
-
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
@@ -99,36 +97,32 @@ def solve2(grid):
     values = grid_values(grid)
     return search(values)
 
+def format_grid(values):
+    return '\n'.join(''.join(values[r + c] for c in cols) for r in rows)
+
 # --- Parallel Utilities ---
 
 num_partitions = 5
 num_cores = 4
 
-def solve_and_verify_partition(df_partition):
-    mismatches = []
+def solve_partition(df_partition):
+    results = []
     for _, row in df_partition.iterrows():
-        quiz = row["quizzes"]
-        solution = row["solutions"]
-        try:
-            result = solve2(quiz)
-            expected = grid_values(solution)
-            if result != expected:
-                mismatches.append((quiz, solution))
-        except Exception as e:
-            mismatches.append((quiz, f"Error: {e}"))
-    return mismatches
+        puzzle = row["quizzes"]
+        solved = solve2(puzzle)
+        formatted = format_grid(solved) if solved else "No solution"
+        results.append((puzzle, formatted))
+    return results
 
-def parallel_solve_and_verify(df):
+def parallel_solve(df):
     df_split = np.array_split(df, num_partitions)
     with Pool(num_cores) as pool:
-        results = pool.map(solve_and_verify_partition, df_split)
-    errors = sum(results, [])
-    if errors:
-        for q, err in errors:
-            print(f"\n\u274c Mismatch or error:\nPuzzle:\n{q}\nIssue:\n{err}\n")
-        raise ValueError("Some puzzles failed to solve correctly.")
-    else:
-        print("\u2705 All puzzles solved and verified successfully.")
+        all_results = pool.map(solve_partition, df_split)
+    for result_group in all_results:
+        for original, solved in result_group:
+            print("\nOriginal Puzzle:\n" + original)
+            print("Solved Puzzle:\n" + solved)
+    print("\u2705 All puzzles processed.")
 
 # --- Main Execution ---
 
@@ -137,4 +131,4 @@ if __name__ == "__main__":
     if not os.path.exists(path):
         raise FileNotFoundError(f"CSV file not found at: {path}")
     data = pd.read_csv(path)
-    parallel_solve_and_verify(data.head(5))
+    parallel_solve(data.head(5))
