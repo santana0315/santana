@@ -17,7 +17,7 @@ This project provides a complete Sudoku puzzle solver with support for batch pro
 ## File Structure
 
 * `sudoku_parallel_solver.py`: Main implementation script
-* `sudoku_sample.csv`: Input CSV containing Sudoku puzzles with at least a `quizzes` column
+* `sudoku_sample.csv`: Input CSV containing Sudoku puzzles with a `quizzes` column
 * `README.md`: Documentation file (this)
 
 ## Requirements
@@ -34,11 +34,13 @@ pip install pandas numpy
 
 ## Input Format
 
-The input CSV file must contain a column named `quizzes` with each entry being an 81-character Sudoku string. Example:
+The input CSV file must contain a single column named `quizzes`, where each entry is an 81-character string representing a Sudoku puzzle:
 
 ```
 quizzes
-530070000600195000098000060800060003400803001700020006060000280000419005000080079
+534678912672195348198342567859761423426853791713924856961537284287419635345286179
+000000907000420180000705026100904000050000040000507009920108000034059000507000000
+302609005000000000000000000000000000000000000000000000000000000000000000000000000
 ...
 ```
 
