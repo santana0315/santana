@@ -1,0 +1,140 @@
+import numpy as np
+import pandas as pd
+import collections
+import copy
+from multiprocessing import Pool
+import os
+
+rows = 'ABCDEFGHI'
+cols = '123456789'
+
+def cross(A, B):
+    return [s + t for s in A for t in B]
+
+boxes = cross(rows, cols)
+
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+unitlist = row_units + column_units + square_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s], [])) - {s}) for s in boxes)
+
+def assign_value(values, box, value):
+    values[box] = value
+    return values
+
+def naked_twins(values):
+    for unit in unitlist:
+        two_digit_boxes = [box for box in unit if len(values[box]) == 2]
+        seen = {}
+        for box in two_digit_boxes:
+            val = values[box]
+            seen.setdefault(val, []).append(box)
+        for val, boxes_with_val in seen.items():
+            if len(boxes_with_val) == 2:
+                for box in unit:
+                    if values[box] != val:
+                        for digit in val:
+                            values = assign_value(values, box, values[box].replace(digit, ''))
+    return values
+
+def grid_values(grid):
+    chars = []
+    digits = '123456789'
+    for c in grid:
+        if c in digits:
+            chars.append(c)
+        elif c in '0.':
+            chars.append(digits)
+        else:
+            raise ValueError(f"Invalid character in puzzle: {c}")
+    assert len(chars) == 81
+    return dict(zip(boxes, chars))
+
+def eliminate(values):
+    solved_values = [box for box in values if len(values[box]) == 1]
+    for box in solved_values:
+        digit = values[box]
+        for peer in peers[box]:
+            values[peer] = values[peer].replace(digit, '')
+    return values
+
+def only_choice(values):
+    for unit in unitlist:
+        for digit in '123456789':
+            dplaces = [box for box in unit if digit in values[box]]
+            if len(dplaces) == 1:
+                values[dplaces[0]] = digit
+    return values
+
+def reduce_puzzle(values):
+    stalled = False
+    while not stalled:
+        solved_values_before = len([box for box in values if len(values[box]) == 1])
+        values = eliminate(values)
+        values = only_choice(values)
+        values = naked_twins(values)
+        solved_values_after = len([box for box in values if len(values[box]) == 1])
+        stalled = solved_values_before == solved_values_after
+        if any(len(values[box]) == 0 for box in values):
+            return False
+    return values
+
+def search(values):
+    values = reduce_puzzle(values)
+    if values is False:
+        return False
+    if all(len(values[s]) == 1 for s in boxes):
+        return values
+    n, min_box = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
+    for digit in values[min_box]:
+        new_sudoku = copy.deepcopy(values)
+        new_sudoku[min_box] = digit
+        attempt = search(new_sudoku)
+        if attempt:
+            return attempt
+
+def solve2(grid):
+    values = grid_values(grid)
+    return search(values)
+
+# --- Parallel Utilities ---
+
+num_partitions = 5
+num_cores = 4
+
+def solve_and_verify_partition(df_partition):
+    mismatches = []
+    for _, row in df_partition.iterrows():
+        quiz = row["quizzes"]
+        solution = row["solutions"]
+        try:
+            result = solve2(quiz)
+            expected = grid_values(solution)
+            if result != expected:
+                mismatches.append((quiz, solution))
+        except Exception as e:
+            mismatches.append((quiz, f"Error: {e}"))
+    return mismatches
+
+def parallel_solve_and_verify(df):
+    df_split = np.array_split(df, num_partitions)
+    with Pool(num_cores) as pool:
+        results = pool.map(solve_and_verify_partition, df_split)
+    errors = sum(results, [])
+    if errors:
+        for q, err in errors:
+            print(f"\n\u274c Mismatch or error:\nPuzzle:\n{q}\nIssue:\n{err}\n")
+        raise ValueError("Some puzzles failed to solve correctly.")
+    else:
+        print("\u2705 All puzzles solved and verified successfully.")
+
+# --- Main Execution ---
+
+if __name__ == "__main__":
+    path = r"C:\\Users\\santa\\IdeaProjects\\kaggle\\sudoku_sample.csv"
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"CSV file not found at: {path}")
+    data = pd.read_csv(path)
+    parallel_solve_and_verify(data.head(5))
