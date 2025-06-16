@@ -1,4 +1,3 @@
-Here's a complete and clear `README.md` file for your Sudoku Solver project:
 
 ---
 
@@ -72,8 +71,8 @@ pip install pandas numpy
 
 1. Place your puzzles in a file named `sudoku_sample.csv` in the following format:
 
-   * Column name: `quizzes`
-   * One puzzle per row
+    * Column name: `quizzes`
+    * One puzzle per row
 2. Run the script:
 
 ```bash
@@ -87,23 +86,24 @@ python sudoku_solver.py
 * **Grid Parsing**: Converts an 81-character string into a 9x9 dictionary.
 * **Constraint Propagation**: Applies:
 
-  * Elimination of known digits from peers
-  * Only-choice to assign digits that fit in one location only
-  * Naked Twins to reduce ambiguity
+    * Elimination of known digits from peers
+    * Only-choice to assign digits that fit in one location only
+    * Naked Twins to reduce ambiguity
 * **Search**: Depth-first recursive search when constraint solving is insufficient
 * **Parallelization**: Uses `multiprocessing.Pool` to divide the dataset into partitions and solve them concurrently.
 
 ## 👤 Author
 
-Created by \[santana sawry].
+Created by \[Yash Choudhary].
 
-## 📄 License
+## 📄 Example csv to run the code.
 
-This project is open-source and free to use under the MIT License.
+````
+quizzes,solutions
+530070000600195000098000060800060003400803001700020006060000280000419005000080079,534678912672195348198342567859761423426853791713924856961537284287419635345286179
+000000907000420180000705026100904000050000040000507009920108000034059000507000000,483621957765429183219735426176984532358192647294567819925148763634259871547316298
+302609005000000000000000000000000000000000000000000000000000000000000000000000000,302609845145783269879124356683591427421376598957842613768935124214768935395412687
+100920000524010000000000070050008102000000000402700090060000000000030945000071006,176923584524817639398645271657489132913256748482731596861594327729368415345172986
+043080250600000000000001094900004070000608000010200003820500000000000005034090710,143986257698742531257351894986134572372658149415279683821597346769413825534862719
 
-```
-
----
-
-Let me know if you'd like this exported to a file or customized further (e.g. change the author name, or make it more academic or beginner-friendly).
-```
+````
