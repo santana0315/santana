@@ -1,78 +1,109 @@
-# Sudoku Solver (Parallelized with Multiprocessing)
+Here's a complete and clear `README.md` file for your Sudoku Solver project:
 
-This project provides a complete Sudoku puzzle solver with support for batch processing multiple puzzles in parallel using Python's `multiprocessing` module.
+---
 
-## Features
+```markdown
+# 🧩 Parallel Sudoku Solver
 
-* Solves standard 9x9 Sudoku puzzles using constraint propagation and depth-first search
-* Implements Sudoku strategies including:
+This project is a parallelized Sudoku solver built in Python. It reads puzzles from a CSV file and solves them efficiently using constraint propagation, search algorithms, and multiprocessing.
 
-  * Elimination
-  * Only Choice
-  * Naked Twins
-* Parses grid-style puzzles (string of 81 characters)
-* Processes multiple puzzles in parallel
-* Displays original and solved puzzles
+## 📌 Features
 
-## File Structure
+- Solves standard 9x9 Sudoku puzzles
+- Implements:
+  - Elimination strategy
+  - Only-choice strategy
+  - Naked twins technique
+  - Recursive depth-first search
+- Uses Python's `multiprocessing` to solve puzzles in parallel
+- Supports batch processing from a CSV file
 
-* `sudoku_parallel_solver.py`: Main implementation script
-* `sudoku_sample.csv`: Input CSV containing Sudoku puzzles with a `quizzes` column
-* `README.md`: Documentation file (this)
+## 📁 File Structure
 
-## Requirements
+```
 
-* Python 3.6+
-* pandas
-* numpy
+sudoku\_solver.py         # Main script to solve Sudoku puzzles
+sudoku\_sample.csv        # CSV file containing puzzles in 'quizzes' column
+README.md                # This documentation
 
-Install required packages:
+```
 
+## 📥 Input
+
+The input CSV file must contain a column named `quizzes` where each row is a Sudoku puzzle represented by an 81-character string. Use `.` or `0` for empty cells.
+
+Example:
+```
+
+quizzes
+"530070000600195000098000060800060003400803001700020006060000280000419005000080079"
+
+```
+
+## 📤 Output
+
+For each puzzle, the script prints:
+- Original Puzzle (in string format)
+- Solved Puzzle (in grid format or `No solution`)
+
+Example:
+```
+
+Original Puzzle:
+530070000600195000098000060800060003400803001700020006060000280000419005000080079
+Solved Puzzle:
+534678912672195348198342567859761423426853791713924856961537284287419635345286179
+✅ All puzzles processed.
+
+````
+
+## ⚙️ Requirements
+
+- Python 3.6+
+- pandas
+- numpy
+
+Install dependencies:
 ```bash
 pip install pandas numpy
+````
+
+## 🚀 How to Run
+
+1. Place your puzzles in a file named `sudoku_sample.csv` in the following format:
+
+   * Column name: `quizzes`
+   * One puzzle per row
+2. Run the script:
+
+```bash
+python sudoku_solver.py
 ```
 
-## Input Format
+> ✅ You can modify the number of cores or partitions used in the script for performance tuning.
 
-The input CSV file must contain a single column named `quizzes`, where each entry is an 81-character string representing a Sudoku puzzle:
+## 🧠 Algorithm Overview
 
-```
-quizzes
-534678912672195348198342567859761423426853791713924856961537284287419635345286179
-000000907000420180000705026100904000050000040000507009920108000034059000507000000
-302609005000000000000000000000000000000000000000000000000000000000000000000000000
-...
-```
+* **Grid Parsing**: Converts an 81-character string into a 9x9 dictionary.
+* **Constraint Propagation**: Applies:
 
-## How to Run
+  * Elimination of known digits from peers
+  * Only-choice to assign digits that fit in one location only
+  * Naked Twins to reduce ambiguity
+* **Search**: Depth-first recursive search when constraint solving is insufficient
+* **Parallelization**: Uses `multiprocessing.Pool` to divide the dataset into partitions and solve them concurrently.
 
-Update the CSV path in the script if necessary:
+## 👤 Author
 
-```python
-path = r"C:\\Users\\santa\\IdeaProjects\\kaggle\\sudoku_sample.csv"
-```
+Created by \[santana sawry].
 
-The script will:
+## 📄 License
 
-1. Load the top 5 puzzles from the CSV
-2. Solve them in parallel
-3. Print original and solved puzzles
-
-## Output Example
+This project is open-source and free to use under the MIT License.
 
 ```
-Original Puzzle:
-530070000600195000098000060...
-Solved Puzzle:
-534678912672195348198342567...
+
+---
+
+Let me know if you'd like this exported to a file or customized further (e.g. change the author name, or make it more academic or beginner-friendly).
 ```
-
-## Notes
-
-* Solving uses recursive search, which may be slow for large batches
-* You can increase `data.head(5)` to process more puzzles
-* Adjust `num_partitions` and `num_cores` based on your CPU
-
-## License
-
-MIT
