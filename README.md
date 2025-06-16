@@ -1,5 +1,3 @@
----
-
 ```markdown
 # 🧠 Parallel Sudoku Solver & Verifier
 
